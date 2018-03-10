@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Meu primeiro app</string>
+    <string name="edit_message">Digite sua mensagem</string>
+</resources>
