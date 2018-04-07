@@ -3,22 +3,20 @@ package br.grupointegrado.tads.buscadorgithub
 import android.os.AsyncTask
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
+import br.grupointegrado.tads.clima.dados.ClimaPreferencias
 import kotlinx.android.synthetic.main.activity_main.*
-import org.json.JSONObject
-import java.lang.Exception
-import java.net.URL
+
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        exercicioJson()
+        //exercicioJson()
+        carregarDadosDoClima()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -42,11 +40,11 @@ class MainActivity : AppCompatActivity() {
         //if(urlBuscaGithub != null){
             //val resultado = NetworkUtils.obterRespostaDaUrlHtpp(urlBuscaGithub)
             //tv_github_resultado.text = resultado
-        val buscaTask = GithubBuscaTask()
-        buscaTask.execute(urlBuscaGithub)
+        //val buscaTask = GithubBuscaTask()
+        //buscaTask.execute(urlBuscaGithub)
         }
 
-    fun exibirResultado(){
+    /*fun exibirResultado(){
         tv_github_resultado.visibility = View.VISIBLE
         tv_mensagem_erro.visibility = View.INVISIBLE
         pb_aguarde.visibility = View.INVISIBLE
@@ -62,11 +60,41 @@ class MainActivity : AppCompatActivity() {
         tv_github_resultado.visibility = View.INVISIBLE
         tv_mensagem_erro.visibility = View.INVISIBLE
         pb_aguarde.visibility = View.VISIBLE
+    }*/
+
+
+    inner class BuscarClimaTask: AsyncTask<String, Void, String>(){
+        override fun doInBackground(vararg params: String): String? {
+            try {
+                val localizacao = params[0]
+                val url = NetworkUtils.construirUrl(localizacao)
+
+                if (url != null) {
+                    val resultado = NetworkUtils.obterRespostaDaUrlHttp(url)
+                    return resultado
+                }
+            }catch (ex: Exception){
+                ex.printStackTrace()
+            }
+                return null
+        }
+
+
+        override fun onPostExecute(resultado: String?) {
+            tv_dados_clima.text = resultado
+        }
+
+
+    }
+
+    fun carregarDadosDoClima(){
+        val localizacao = ClimaPreferencias.getLocalizacaoSalva(this)
+        BuscarClimaTask().execute(localizacao)
     }
 
 
 
-    fun exercicioJson() {
+    /*fun exercicioJson() {
         var dadosJson = """{
             "temperatura": {
             "minima": 11.34,
@@ -120,7 +148,7 @@ class MainActivity : AppCompatActivity() {
                 exibirMensagemErro()
             }
         }
-    }
+    }*/
 
 
 }
