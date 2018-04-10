@@ -12,9 +12,9 @@
 
     <EditText
         android:id="@+id/et_busca"
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:hint="Digite o nome do repositorio"
+        android:layout_height="wrap_content"
+        android:hint="Digite o nome do repositório"
         android:textSize="22sp" />
 
     <TextView
@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="A URL será exibida aqui"
-        android:textSize="22sp"/>
+        android:textSize="22sp" />
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -35,23 +35,24 @@
             android:layout_marginTop="16dp">
 
             <TextView
-                android:id="@+id/tv_dados_clima"
+                android:id="@+id/tv_github_resultado"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Faça uma busca"
-                android:textSize="18sp"/>
+                android:text="Faça uma busca!"
+                android:textSize="18sp" />
+
         </ScrollView>
 
         <TextView
             android:id="@+id/tv_mensagem_erro"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/mensagem_erro"
             android:layout_gravity="center"
-            android:textSize="22sp"
-            android:textColor="#ff0000"
             android:padding="16dp"
-            android:visibility="invisible"/>
+            android:text="@string/mensagem_erro"
+            android:textColor="#ff0000"
+            android:textSize="22sp"
+            android:visibility="invisible" />
 
         <ProgressBar
             android:id="@+id/pb_aguarde"
@@ -59,5 +60,7 @@
             android:layout_height="42dp"
             android:layout_gravity="center"
             android:visibility="invisible"/>
+
     </FrameLayout>
+
 </LinearLayout>

@@ -100,6 +100,7 @@ class MainActivity : AppCompatActivity() {
                     val dataHoraMilissegundos: Long = (java.lang.Long.valueOf(result)) * 1000
                     val dataHora = Date(dataHoraMilissegundos)
                     val dataFormatada = DateFormat.format("dd/MM/yyyy ", dataHora)
+
                     val main = obj.getJSONObject("main")
                     val temp = main.getString("temp")
                     val umidade = main.getString("humidity")
