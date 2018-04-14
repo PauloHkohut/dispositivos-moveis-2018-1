@@ -89,35 +89,32 @@ class MainActivity : AppCompatActivity() {
             if (resultado != null) {
                 tv_dados_clima.text = ""
 
-
                 val json = JSONObject(resultado)
-                val items = json.getJSONArray("list")
+                val listaPrevisoes = json.getJSONArray("list")
 
-                for (i in 0 until items.length()) {
+                for (i in 0 until listaPrevisoes.length()) {
+                    val previsao = listaPrevisoes.getJSONObject(i)
 
-                    val obj = items.getJSONObject(i)
-                    val result = obj.getString("dt")
-                    val dataHoraMilissegundos: Long = (java.lang.Long.valueOf(result)) * 1000
-                    val dataHora = Date(dataHoraMilissegundos)
-                    val dataFormatada = DateFormat.format("dd/MM/yyyy ", dataHora)
+                    val dataLong = previsao.getLong("dt")
+                    val data = Date(dataLong * 1000)
+                    val dataFormatada = DateFormat.format("dd/MM/yyyy HH:mm", data)
 
-                    val main = obj.getJSONObject("main")
-                    val temp = main.getString("temp")
-                    val umidade = main.getString("humidity")
+                    val principal = previsao.getJSONObject("main")
+                    val temperatura = principal.getDouble("temp")
+                    val umidade = principal.getDouble("humidity")
 
-                    val opclima = obj.getJSONArray("weather")
-
-                    val clima = opclima.getJSONObject(0)
+                    val listaClimas = previsao.getJSONArray("weather")
+                    val clima = listaClimas.getJSONObject(0)
                     val descricao = clima.getString("description")
 
-                    tv_dados_clima.append(" Data: $dataFormatada \n"
-                            + " Temperatura: $temp ºC\n"
-                            + " Umidade: $umidade %\n" +
-                            " Clima: $descricao \n\n\n")
+                    tv_dados_clima.append("Data: $dataFormatada \n")
+                    tv_dados_clima.append("Temperatura: $temperatura ºC \n")
+                    tv_dados_clima.append("Umidade: $umidade % \n")
+                    tv_dados_clima.append("Clima: $descricao \n")
+                    tv_dados_clima.append("\n\n")
                 }
 
                 exibirResultado()
-
             } else {
                 exibirMensagemErro()
             }

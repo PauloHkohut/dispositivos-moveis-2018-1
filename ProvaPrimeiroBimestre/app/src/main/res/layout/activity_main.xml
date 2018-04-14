@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp"
+    tools:context=".MainActivity">
+
+    <EditText
+        android:id="@+id/edit_base"
+        android:layout_width="165dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp" />
+
+    <EditText
+        android:id="@+id/edit_altura"
+        android:layout_width="165dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp" />
+
+    <EditText
+        android:id="@+id/edit_profundidade"
+        android:layout_width="167dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp" />
+
+    <TextView
+        android:id="@+id/result_area"
+        android:layout_width="183dp"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text=""
+        android:textSize="22sp" />
+
+    <TextView
+        android:id="@+id/result_volume"
+        android:layout_width="183dp"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text=""
+        android:textSize="22sp" />
+
+    <TextView
+        android:id="@+id/calc_mensagem_erro"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="16dp"
+        android:text="@string/mensagem_erro"
+        android:textColor="#ff0000"
+        android:textSize="22sp"
+        android:visibility="invisible" />
+
+</LinearLayout>
