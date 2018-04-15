@@ -50,7 +50,10 @@ class MainActivity : AppCompatActivity() {
         val base = edit_base.text.toString().toInt()
         val altura = edit_altura.text.toString().toInt()
         val profundidade = edit_profundidade.text.toString().toInt()
-        
+
+        if (edit_base.text.isEmpty() || edit_altura.text.isEmpty() || edit_profundidade.text.isEmpty()){
+            exibirMensagemErro()
+        }else {
 
             val calc_area = base * altura
             val calc_volume = base * altura * profundidade
@@ -58,7 +61,7 @@ class MainActivity : AppCompatActivity() {
             result_area.append("Área: $calc_area")
             result_volume.append("Volume: $calc_volume")
 
-
+        }
 
         }
 
