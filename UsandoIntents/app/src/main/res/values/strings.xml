@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">UsandoIntents</string>
+    <string name="btn_abrir_site">Abrir Site</string>
+    <string name="btn_abrir_mapa">Abrir Mapa</string>
+    <string name="btn_compartilhar">Compartilhar</string>
 </resources>
