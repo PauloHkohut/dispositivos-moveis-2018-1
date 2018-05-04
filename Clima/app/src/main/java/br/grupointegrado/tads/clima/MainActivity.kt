@@ -12,9 +12,13 @@ import br.grupointegrado.tads.clima.util.NetworkUtils
 import br.grupointegrado.tads.clima.dados.ClimaPreferencias
 import br.grupointegrado.tads.clima.util.JsonUtils
 import kotlinx.android.synthetic.main.activity_main.*
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
 
-class MainActivity : AppCompatActivity() {
-    //
+class MainActivity : AppCompatActivity(), PrevisaoAdapter.PrevisaoItemClickListener {
+
+
     var previsaoAdapter: PrevisaoAdapter? = null
 
 
@@ -22,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        previsaoAdapter = PrevisaoAdapter(null)
+        previsaoAdapter = PrevisaoAdapter(null, )
         val linearLayout = LinearLayoutManager(this)
 
         rv_clima.layoutManager = linearLayout
@@ -32,6 +36,28 @@ class MainActivity : AppCompatActivity() {
         carregarDadosDoClima()
     }
 
+    override fun onItemClick(index: Int) {
+        val previsao = previsaoAdapter!!.getDadosClima()!!.get(index)
+
+        val intentDetalhes = Intent(this, DetalhesActivity::class.java)
+        intentDetalhes.putExtra(DetalhesActivity.DADOS_PREVISAO, previsao)
+
+        startActivity(intentDetalhes)
+    }
+
+
+    fun abrirMapa() {
+        val addressString = "Campo Mourão, Paraná, Brasil"
+        val uriGeo = Uri.parse("geo:0,0?q=$addressString")
+
+        val intentMapa = Intent(Intent.ACTION_VIEW)
+        intentMapa.data = uriGeo
+
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intentMapa)
+        }
+    }
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.clima, menu)
@@ -39,10 +65,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        if (item?.itemId == R.id.acao_atualizar) {
-            //tv_dados_clima.text = ""
-            carregarDadosDoClima()
-
+        if (item?.itemId === R.id.acao_atualizar) {
+            carregarDadosClima()
+            return true
+        }
+        if (item?.itemId === R.id.acao_mapa) {
+            abrirMapa()
             return true
         }
         return super.onOptionsItemSelected(item)

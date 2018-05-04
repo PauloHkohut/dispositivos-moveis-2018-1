@@ -11,12 +11,15 @@ class PrevisaoAdapter : RecyclerView.Adapter<PrevisaoAdapter.PrevisaoViewHolder>
     // colocando como private automaticamente retira o setDadosClima padrao(ele ja existe)
     //fazendo assim voce mesmo que cria o metodo.
     private var dadosClima: Array<String?>?
+    private var itemClickListener: PrevisaoItemClickListener
 
     constructor(dadosClima: Array<String?>?){
         this.dadosClima = dadosClima
+        this.itemClickListener = itemClickListener
+
     }
 
-    inner class PrevisaoViewHolder : RecyclerView.ViewHolder{
+    /*inner class PrevisaoViewHolder : RecyclerView.ViewHolder{
 
         val tvDadosPrevisao: TextView
 
@@ -24,7 +27,7 @@ class PrevisaoAdapter : RecyclerView.Adapter<PrevisaoAdapter.PrevisaoViewHolder>
             tvDadosPrevisao = itemView.findViewById(R.id.tv_dados_previsao)
         }
 
-    }
+    }*/
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PrevisaoViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.previsao_lista_item,
@@ -53,6 +56,24 @@ class PrevisaoAdapter : RecyclerView.Adapter<PrevisaoAdapter.PrevisaoViewHolder>
     fun setDadosClima(dadosClima: Array<String?>?){
         this.dadosClima = dadosClima
         notifyDataSetChanged()
+    }
+
+
+    interface PrevisaoItemClickListener {
+        fun onItemClick(index: Int)
+    }
+
+    inner class PrevisaoViewHolder : RecyclerView.ViewHolder {
+
+        val tvDadosPrevisao: TextView
+
+        constructor(itemView: View) : super(itemView) {
+            tvDadosPrevisao = itemView.findViewById(R.id.tv_dados_previsao)
+
+            itemView.setOnClickListener({
+                itemClickListener.onItemClick(adapterPosition)
+            })
+        }
     }
 
 }
