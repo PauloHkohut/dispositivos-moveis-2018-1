@@ -26,14 +26,14 @@ class MainActivity : AppCompatActivity(), PrevisaoAdapter.PrevisaoItemClickListe
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        previsaoAdapter = PrevisaoAdapter(null, )
+        previsaoAdapter = PrevisaoAdapter(null, this)
         val linearLayout = LinearLayoutManager(this)
 
         rv_clima.layoutManager = linearLayout
         rv_clima.adapter = previsaoAdapter
 
 
-        carregarDadosDoClima()
+        carregarDadosClima()
     }
 
     override fun onItemClick(index: Int) {
@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity(), PrevisaoAdapter.PrevisaoItemClickListe
         pb_aguarde.visibility = View.VISIBLE
     }
 
-    fun carregarDadosDoClima() {
+    fun carregarDadosClima() {
         val localizacao = ClimaPreferencias.getLocalizacaoSalva(this)
         buscarClimaTask().execute(localizacao)
     }

@@ -13,7 +13,7 @@ class PrevisaoAdapter : RecyclerView.Adapter<PrevisaoAdapter.PrevisaoViewHolder>
     private var dadosClima: Array<String?>?
     private var itemClickListener: PrevisaoItemClickListener
 
-    constructor(dadosClima: Array<String?>?){
+    constructor(dadosClima: Array<String?>?, itemClickListener: PrevisaoItemClickListener){
         this.dadosClima = dadosClima
         this.itemClickListener = itemClickListener
 
@@ -56,6 +56,10 @@ class PrevisaoAdapter : RecyclerView.Adapter<PrevisaoAdapter.PrevisaoViewHolder>
     fun setDadosClima(dadosClima: Array<String?>?){
         this.dadosClima = dadosClima
         notifyDataSetChanged()
+    }
+
+    fun getDadosClima() : Array<String?>? {
+        return dadosClima
     }
 
 
