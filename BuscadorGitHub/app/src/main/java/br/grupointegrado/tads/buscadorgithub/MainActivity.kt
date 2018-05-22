@@ -1,16 +1,16 @@
 package br.grupointegrado.tads.buscadorgithub
 
 import android.content.Intent
-import android.os.AsyncTask
+import android.content.SharedPreferences
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.AsyncTaskLoader
+import android.support.v4.content.ContextCompat
 import android.support.v4.content.Loader
+import android.support.v7.preference.PreferenceManager
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -18,7 +18,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONObject
 import java.net.URL
 
-class MainActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<String> {
+class MainActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<String>,
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     companion object {
         val GITHUB_BUSCA_LOADER = 1000
@@ -41,6 +42,23 @@ class MainActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<String> 
 //            }
         }
 
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+
+        val exibirUrl = sharedPreferences.getBoolean(
+                getString(R.string.pref_exibir_url),
+                resources.getBoolean(R.bool.pref_exibir_url_padrao)
+        )
+
+        tv_url.visibility = if (exibirUrl) View.VISIBLE else View.INVISIBLE
+
+        val corFundo = sharedPreferences.getString(
+                getString(R.string.pref_cor_fundo),
+                getString(R.string.pref_cor_fundo_padrao)
+        )
+        window.decorView.setBackgroundColor(selecionaCorDeFundo(corFundo))
+
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+
         et_busca.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 cacheResultado = null
@@ -54,8 +72,37 @@ class MainActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<String> 
         })
 
         supportLoaderManager.initLoader(GITHUB_BUSCA_LOADER, null, this)
+    }
 
-        // exercicioJson()
+    fun selecionaCorDeFundo(corFundo: String): Int {
+        return when (corFundo) {
+            getString(R.string.pref_cor_fundo_branco_valor) -> ContextCompat.getColor(this, R.color.fundoBranco)
+            getString(R.string.pref_cor_fundo_verde_valor) -> ContextCompat.getColor(this, R.color.fundoVerde)
+            getString(R.string.pref_cor_fundo_azul_valor) -> ContextCompat.getColor(this, R.color.fundoAzul)
+            else -> ContextCompat.getColor(this, R.color.fundoBranco)
+        }
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+        if (key == getString(R.string.pref_exibir_url)) {
+            val exibirUrl = sharedPreferences.getBoolean(
+                    key,
+                    resources.getBoolean(R.bool.pref_exibir_url_padrao)
+            )
+            tv_url.visibility = if (exibirUrl) View.VISIBLE else View.INVISIBLE
+        } else if (key == getString(R.string.pref_cor_fundo)) {
+            val corFundo = sharedPreferences.getString(
+                    key,
+                    getString(R.string.pref_cor_fundo_padrao)
+            )
+            window.decorView.setBackgroundColor(selecionaCorDeFundo(corFundo))
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(this)
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
@@ -68,7 +115,6 @@ class MainActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<String> 
 //        outState?.putString(RESULTADO_EXTRA, resultado)
     }
 
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.main, menu)
         return true
@@ -78,11 +124,10 @@ class MainActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<String> 
         if (item?.itemId == R.id.action_buscar) {
             buscarNoGithub()
         }
-
-        if (item?.itemId == R.id.action_configuracoes)
+        if (item?.itemId == R.id.action_configuracoes) {
             val intent = Intent(this, ConfiguracaoActivity::class.java)
             startActivity(intent)
-
+        }
         return super.onOptionsItemSelected(item)
     }
 
@@ -92,9 +137,7 @@ class MainActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<String> 
         tv_url.text = urlBusca.toString()
 
         if (urlBusca != null) {
-            //val task = GithubBuscaTask()
             val parametros = Bundle()
-            //task.execute(urlBusca)
             parametros.putString(URL_BUSCA_EXTRA, urlBusca.toString())
             supportLoaderManager.restartLoader(GITHUB_BUSCA_LOADER, parametros, this)
         }
@@ -117,8 +160,6 @@ class MainActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<String> 
         tv_mensagem_erro.visibility = View.INVISIBLE
         pb_aguarde.visibility = View.VISIBLE
     }
-
-
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<String> {
         val loader = object : AsyncTaskLoader<String>(this) {
@@ -183,73 +224,4 @@ class MainActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<String> 
     override fun onLoaderReset(loader: Loader<String>?) {
         // nada a implementar
     }
-
-    //    fun exercicioJson() {
-    //        var dadosJson = """
-    //            {
-    //                "temperatura": {
-    //                    "maxima": 11.34,
-    //                    "minima": 19.01
-    //                },
-    //                "clima": {
-    //                    "id": 801,
-    //                    "condicao": "Nuvens",
-    //                    "descricao": "poucas nuvens"
-    //                },
-    //                "pressao": 1023.51,
-    //                "umidade": 87
-    //            }
-    //            """
-    //        val objetoPrevisao = JSONObject(dadosJson)
-    //        val clima = objetoPrevisao.getJSONObject("clima")
-    //        val condicao = clima.getString("condicao")
-    //        val pressao = objetoPrevisao.getDouble("pressao")
-    //
-    //        Log.d("exercicioJson", "$condicao -> $pressao")
-    //    }
-
-    /*inner class GithubBuscaTask : AsyncTask<URL, Void, String>() {
-
-        override fun onPreExecute() {
-            exibirProgressBar()
-        }
-
-        override fun doInBackground(vararg params: URL?): String? {
-            try {
-                val url = params[0]
-                val resultado =
-                        NetworkUtils.obterRespostaDaUrlHtpp(url!!)
-                return resultado
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            }
-            return null
-        }
-
-        override fun onPostExecute(resultado: String?) {
-            if (resultado != null) {
-                /**
-                 * Lendo o JSON para exibir apenas os nomes dos repositórios
-                 */
-
-                tv_github_resultado.text = ""
-
-                val json = JSONObject(resultado)
-                val items = json.getJSONArray("items")
-
-                // percorra de Zero até o tamanho do array
-                for (i in 0 until items.length()) {
-                    val repository = items.getJSONObject(i)
-                    val name = repository.getString("name")
-
-                    tv_github_resultado.append("$name \n\n\n")
-                }
-
-                exibirResultado()
-            } else {
-                exibirMensagemErro()
-            }
-        }
-    }*/
-
 }
