@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.v4.app.ShareCompat
 import android.view.Menu
 import android.view.MenuItem
+import kotlinx.android.synthetic.main.activity_detalhes.*
 
 class DetalhesActivity : AppCompatActivity() {
 
