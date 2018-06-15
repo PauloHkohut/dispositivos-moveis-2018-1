@@ -14,4 +14,10 @@
         android:title="@string/acao_mapa"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/acao_configuracao"
+        android:orderInCategory="3"
+        android:title="@string/acao_configuracao"
+        app:showAsAction="never" />
+
 </menu>

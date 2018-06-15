@@ -13,27 +13,102 @@ import br.grupointegrado.tads.clima.dados.ClimaPreferencias
 import br.grupointegrado.tads.clima.util.JsonUtils
 import kotlinx.android.synthetic.main.activity_main.*
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
+import android.support.v4.app.LoaderManager
+import android.support.v4.content.AsyncTaskLoader
+import android.support.v4.content.Loader
+import android.support.v7.preference.PreferenceManager
 import android.util.Log
 
-class MainActivity : AppCompatActivity(), PrevisaoAdapter.PrevisaoItemClickListener {
+class MainActivity : AppCompatActivity(),
+        PrevisaoAdapter.PrevisaoItemClickListener,
+        LoaderManager.LoaderCallbacks<Array<String?>?>,
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
+    companion object {
+        val DADOS_PREVISAO_LOADER = 1000
+        var PREFERENCIAS_FORAM_ALTERADAS = false
+    }
 
     var previsaoAdapter: PrevisaoAdapter? = null
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         previsaoAdapter = PrevisaoAdapter(null, this)
-        val linearLayout = LinearLayoutManager(this)
+        val layoutManager = LinearLayoutManager(this)
 
-        rv_clima.layoutManager = linearLayout
+        rv_clima.layoutManager = layoutManager
         rv_clima.adapter = previsaoAdapter
 
+        supportLoaderManager.initLoader(DADOS_PREVISAO_LOADER, null, this)
 
-        carregarDadosClima()
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onCreateLoader(id: Int, args: Bundle?): Loader<Array<String?>?> {
+        val loader = object : AsyncTaskLoader<Array<String?>?>(this) {
+
+            var dadosPrevisao: Array<String?>? = null
+
+            override fun onStartLoading() {
+                if (dadosPrevisao != null) {
+                    deliverResult(dadosPrevisao);
+                } else {
+                    exibirProgressBar()
+                    forceLoad()
+                }
+            }
+
+            override fun loadInBackground(): Array<String?>? {
+                try {
+                    val localizacao = ClimaPreferencias
+                            .getLocalizacaoSalva(this@MainActivity)
+
+                    val url = NetworkUtils.construirUrl(localizacao)
+
+                    if (url != null) {
+                        val resultado = NetworkUtils.obterRespostaDaUrlHttp(url)
+                        val dadosClima = JsonUtils
+                                .getSimplesStringsDeClimaDoJson(this@MainActivity,
+                                        resultado!!)
+                        return dadosClima
+                    }
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                }
+                return null
+            }
+
+            override fun deliverResult(data: Array<String?>?) {
+                super.deliverResult(data)
+                dadosPrevisao = data
+            }
+        }
+        return loader
+    }
+
+    override fun onLoadFinished(loader: Loader<Array<String?>?>?,
+                                dadosClima: Array<String?>?) {
+        previsaoAdapter?.setDadosClima(dadosClima)
+        if (dadosClima != null) {
+            exibirResultado()
+        } else {
+            exibirMensagemErro()
+        }
+    }
+
+    override fun onLoaderReset(loader: Loader<Array<String?>?>?) {
     }
 
     override fun onItemClick(index: Int) {
@@ -45,9 +120,8 @@ class MainActivity : AppCompatActivity(), PrevisaoAdapter.PrevisaoItemClickListe
         startActivity(intentDetalhes)
     }
 
-
     fun abrirMapa() {
-        val addressString = "Campo Mourão, Paraná, Brasil"
+        val addressString = ClimaPreferencias.getLocalizacaoSalva(this)
         val uriGeo = Uri.parse("geo:0,0?q=$addressString")
 
         val intentMapa = Intent(Intent.ACTION_VIEW)
@@ -58,7 +132,6 @@ class MainActivity : AppCompatActivity(), PrevisaoAdapter.PrevisaoItemClickListe
         }
     }
 
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.clima, menu)
         return true
@@ -66,14 +139,23 @@ class MainActivity : AppCompatActivity(), PrevisaoAdapter.PrevisaoItemClickListe
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         if (item?.itemId === R.id.acao_atualizar) {
-            carregarDadosClima()
+            supportLoaderManager.restartLoader(DADOS_PREVISAO_LOADER, null, this)
             return true
         }
         if (item?.itemId === R.id.acao_mapa) {
             abrirMapa()
             return true
         }
+        if (item?.itemId === R.id.acao_configuracao) {
+            abrirConfiguracao()
+            return true
+        }
         return super.onOptionsItemSelected(item)
+    }
+
+    fun abrirConfiguracao() {
+        val intent = Intent(this, ConfiguracaoActivity::class.java)
+        startActivity(intent)
     }
 
     fun exibirResultado() {
@@ -81,7 +163,6 @@ class MainActivity : AppCompatActivity(), PrevisaoAdapter.PrevisaoItemClickListe
         tv_mensagem_erro.visibility = View.INVISIBLE
         pb_aguarde.visibility = View.INVISIBLE
     }
-
 
     fun exibirMensagemErro() {
         rv_clima.visibility = View.INVISIBLE
@@ -95,50 +176,20 @@ class MainActivity : AppCompatActivity(), PrevisaoAdapter.PrevisaoItemClickListe
         pb_aguarde.visibility = View.VISIBLE
     }
 
-    fun carregarDadosClima() {
-        val localizacao = ClimaPreferencias.getLocalizacaoSalva(this)
-        buscarClimaTask().execute(localizacao)
-    }
+    override fun onStart() {
+        super.onStart()
 
-    inner class buscarClimaTask : AsyncTask<String, Void, String>() {
-
-        override fun onPreExecute() {
-            exibirProgressBar()
-        }
-
-        override fun doInBackground(vararg params: String): String? {
-
-            try {
-                val localizacao = params[0]
-                val url = NetworkUtils.construirUrl(localizacao)
-
-                if (url != null) {
-                    val resultado = NetworkUtils.obterRespostaDaUrlHttp(url)
-                    return resultado
-                }
-
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            }
-            return null
-        }
-
-
-        override fun onPostExecute(resultado: String?) {
-            if (resultado != null) {
-                //tv_dados_clima.text = ""
-
-
-                //No getSimplesStringsDeClimaDoJson pode usar (applicationContext) no lugar de this@MainActivity
-                val conversao = JsonUtils.getSimplesStringsDeClimaDoJson(this@MainActivity, resultado)
-                previsaoAdapter?.setDadosClima(conversao)
-
-                exibirResultado()
-            } else {
-                exibirMensagemErro()
-            }
+        if (PREFERENCIAS_FORAM_ALTERADAS) {
+            supportLoaderManager.restartLoader(DADOS_PREVISAO_LOADER, null, this)
+            PREFERENCIAS_FORAM_ALTERADAS = false
         }
     }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?,
+                                           key: String?) {
+        PREFERENCIAS_FORAM_ALTERADAS = true
+    }
+
 
 
     /*val json = JSONObject(resultado)

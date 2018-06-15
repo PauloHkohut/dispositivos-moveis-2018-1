@@ -7,53 +7,42 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 
-class PrevisaoAdapter : RecyclerView.Adapter<PrevisaoAdapter.PrevisaoViewHolder>{
+class PrevisaoAdapter : RecyclerView.Adapter<PrevisaoAdapter.PrevisaoViewHolder> {
+
     // colocando como private automaticamente retira o setDadosClima padrao(ele ja existe)
     //fazendo assim voce mesmo que cria o metodo.
+
     private var dadosClima: Array<String?>?
     private var itemClickListener: PrevisaoItemClickListener
 
-    constructor(dadosClima: Array<String?>?, itemClickListener: PrevisaoItemClickListener){
+    constructor(dadosClima: Array<String?>?, itemClickListener: PrevisaoItemClickListener) {
         this.dadosClima = dadosClima
-        this.itemClickListener = itemClickListener
-
+        this.itemClickListener = itemClickListener;
     }
 
-    /*inner class PrevisaoViewHolder : RecyclerView.ViewHolder{
-
-        val tvDadosPrevisao: TextView
-
-        constructor(itemView: View) : super(itemView){
-            tvDadosPrevisao = itemView.findViewById(R.id.tv_dados_previsao)
+    override fun getItemCount(): Int {
+        val dados = dadosClima
+        if (dados != null) {
+            return dados.size
         }
-
-    }*/
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PrevisaoViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.previsao_lista_item,
-                parent, false)
-
-        val viewViewHolder = PrevisaoViewHolder(view)
-
-        return viewViewHolder
+        return 0
     }
 
     override fun onBindViewHolder(holder: PrevisaoViewHolder, position: Int) {
         val previsao = dadosClima?.get(position)
-        holder.tvDadosPrevisao.text = previsao.toString()
+        holder.tvDadosPrevisao.text = previsao
     }
 
-    override fun getItemCount() : Int{
-        val dados = dadosClima
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PrevisaoViewHolder {
+        val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.previsao_lista_item, parent, false)
 
-        if (dados != null){
-            return dados.size
-        }else{
-            return 0
-        }
+        val viewHolder = PrevisaoViewHolder(view)
+
+        return viewHolder
     }
 
-    fun setDadosClima(dadosClima: Array<String?>?){
+    fun setDadosClima(dadosClima: Array<String?>?) {
         this.dadosClima = dadosClima
         notifyDataSetChanged()
     }
@@ -61,7 +50,6 @@ class PrevisaoAdapter : RecyclerView.Adapter<PrevisaoAdapter.PrevisaoViewHolder>
     fun getDadosClima() : Array<String?>? {
         return dadosClima
     }
-
 
     interface PrevisaoItemClickListener {
         fun onItemClick(index: Int)
@@ -79,5 +67,4 @@ class PrevisaoAdapter : RecyclerView.Adapter<PrevisaoAdapter.PrevisaoViewHolder>
             })
         }
     }
-
 }
