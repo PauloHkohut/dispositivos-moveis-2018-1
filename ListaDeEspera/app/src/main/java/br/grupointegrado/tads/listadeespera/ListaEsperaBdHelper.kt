@@ -9,7 +9,7 @@ class ListaEsperaBdHelper : SQLiteOpenHelper {
 
     companion object {
         val BD_NOME = "listaespera.db"
-        val BD_VERSAO = 1
+        val BD_VERSAO = 2
     }
 
     constructor(context: Context) : super(context, BD_NOME, null, BD_VERSAO){

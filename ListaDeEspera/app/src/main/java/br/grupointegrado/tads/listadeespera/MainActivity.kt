@@ -31,7 +31,8 @@ class MainActivity : AppCompatActivity() {
         clientesAdapter = ClientesAdapter(cursor)
         rv_clientes.adapter = clientesAdapter
 
-        val itemTouch = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+        val itemTouch = ItemTouchHelper(
+                object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
 
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
                 return false
@@ -85,10 +86,10 @@ class MainActivity : AppCompatActivity() {
         return database!!.insert(ListaEsperaContrato.Clientes.TABELA, null, cliente)
     }
 
-    private fun removerCliente(clienteId: Long): Boolean {
+    private fun removerCliente(id: Long): Boolean {
         val nomeTabela = ListaEsperaContrato.Clientes.TABELA
         val where = "${BaseColumns._ID} = ?"
-        val argumentos = arrayOf(clienteId.toString())
+        val argumentos = arrayOf(id.toString())
 
         val removidos = database!!.delete(nomeTabela, where, argumentos)
 

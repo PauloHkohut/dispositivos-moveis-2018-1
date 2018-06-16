@@ -34,7 +34,8 @@ class ClientesAdapter : RecyclerView.Adapter<ClientesAdapter.ClienteViewHolder> 
         }
 
         val id = cursor.getLong(cursor.getColumnIndex(BaseColumns._ID))
-        val nome = cursor.getString(cursor.getColumnIndex(ListaEsperaContrato.Clientes.COLUNA_NOME))
+        val colunaNome = cursor.getColumnIndex(ListaEsperaContrato.Clientes.COLUNA_NOME)
+        val nome = cursor.getString(colunaNome)
         val tamanhoGrupo = cursor.getInt(cursor.getColumnIndex(ListaEsperaContrato.Clientes.COLUNA_TAMANHO_GRUPO))
 
         holder.itemView.tag = id
