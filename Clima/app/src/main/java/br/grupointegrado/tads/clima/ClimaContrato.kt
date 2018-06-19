@@ -1,8 +1,13 @@
 package br.grupointegrado.tads.clima
 
+import android.net.Uri
 import android.provider.BaseColumns
 
-class ClimaContrato {
+object ClimaContrato {
+
+    val AUTORIDADE = "br.grupointegrado.tads.ClimaContentProvider"
+    val URI_BASE = Uri.parse("content://$AUTORIDADE")
+    val URI_CLIMA = "clima"
 
     internal object clima : BaseColumns{
         const val TABELA = "clima"
