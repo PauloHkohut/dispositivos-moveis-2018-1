@@ -10,93 +10,112 @@ import br.grupointegrado.tads.clima.util.DataUtils
 class ClimaContentProvider : ContentProvider() {
 
     companion object {
-        val CODE_CLIMA = 100
-        val CODE_CLIMA_POR_DATA = 101
+        var CODE_CLIMA = 100
+        var CODE_CLIMA_POR_DATA = 101
 
-        val uriMatcher: UriMatcher
+        val uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
 
         init {
-            uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
-            uriMatcher.addURI(ClimaContrato.AUTORIDADE, ClimaContrato.URI_CLIMA, CODE_CLIMA)
+            // content://br.grupointegrado.tads.clima.dados.ClimaContentProvider/clima
+            uriMatcher.addURI(ClimaContrato.AUTORIDADE,
+                    ClimaContrato.URI_CLIMA,
+                    CODE_CLIMA)
+
+            // content://br.grupointegrado.tads.clima.dados.ClimaContentProvider/clima/#
+            uriMatcher.addURI(ClimaContrato.AUTORIDADE,
+                    "${ClimaContrato.URI_CLIMA}/#",
+                    CODE_CLIMA_POR_DATA)
         }
     }
 
     var bdHelper: ClimaBdHelper? = null
 
-    override fun insert(uri: Uri, values: ContentValues?): Uri {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onCreate(): Boolean {
+        bdHelper = ClimaBdHelper(this.context)
+        return true
     }
 
-    override fun query(uri: Uri, projection: Array<out String>?, selection: String?, selectionArgs: Array<out String>?,
-                       SortOrder: String?): Cursor {
+    override fun shutdown() {
+        bdHelper?.close()
+    }
+
+    override fun query(uri: Uri, projection: Array<out String>?,
+                       selection: String?, selectionArgs: Array<out String>?,
+                       sortOrder: String?): Cursor {
         val bd = bdHelper!!.readableDatabase
         val cursor: Cursor
-
-        when (uriMatcher.match(uri)){
+        when (uriMatcher.match(uri)) {
             CODE_CLIMA -> {
-                cursor = bd.query(ClimaContrato.clima.TABELA)
-        }
-            CODE_CLIMA_POR_DATA -> {
-
+                cursor = bd.query(ClimaContrato.clima.TABELA,
+                        null, null, null, null, null,
+                        sortOrder)
             }
-            else -> throw
+            CODE_CLIMA_POR_DATA -> {
+                val dataClima = uri.lastPathSegment
+                val where = "${ClimaContrato.clima.COLUNA_DATA_HORA} = ?"
+                var whereArgs = arrayOf(dataClima.toString())
+                cursor = bd.query(ClimaContrato.clima.TABELA,
+                        null, where, whereArgs, null, null,
+                        sortOrder)
+            }
+            else -> throw UnsupportedOperationException("Uri desconhecida: $uri")
         }
+        cursor.setNotificationUri(context.contentResolver, uri)
+        return cursor
     }
 
-
     override fun bulkInsert(uri: Uri, values: Array<out ContentValues>): Int {
-
         val bd = bdHelper!!.writableDatabase
-
-        when (uriMatcher.match(uri)){
+        when (uriMatcher.match(uri)) {
             CODE_CLIMA -> {
                 var registrosInseridos = 0
                 bd.beginTransaction()
                 try {
-                    for (value in values){
-                        val dataClima = value.getAsLong(ClimaContrato.clima.COLUNA_DATA_HORA)
-                        if (!DataUtils.dataEstaNormalizada(dataClima)){
-                            throw IllegalArgumentException("A data deve estar normalizada.")
-                        }
+                    for (value in values) {
                         val _id = bd.insert(ClimaContrato.clima.TABELA, null, value)
-                        if (_id != -1L){
+                        if (_id != -1L) {
                             registrosInseridos++
                         }
                     }
                     bd.setTransactionSuccessful()
-                }finally {
+                } finally {
                     bd.endTransaction()
                 }
-                if (registrosInseridos > 0){
+                if (registrosInseridos > 0) {
                     context.contentResolver.notifyChange(uri, null)
                 }
                 return registrosInseridos
             }
         }
-
         return super.bulkInsert(uri, values)
     }
 
-
-
-    override fun onCreate(): Boolean {
-       bdHelper = ClimaBdHelper(this.context)
-        return true
+    override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int {
+        var registrosDeletados: Int
+        val selecao = if (selection != null) selection else "1"
+        when (uriMatcher.match(uri)) {
+            CODE_CLIMA -> {
+                registrosDeletados = bdHelper!!.getWritableDatabase().delete(
+                        ClimaContrato.clima.TABELA,
+                        selecao, selectionArgs)
+            }
+            else -> throw UnsupportedOperationException("Uri desconhecida: $uri")
+        }
+        if (registrosDeletados != 0) {
+            context.contentResolver.notifyChange(uri, null)
+        }
+        return registrosDeletados
     }
 
-    override fun shutdown() {//avisa que o context sera destruido
-        bdHelper?.close()
-    }
-
-    override fun update(p0: Uri?, p1: ContentValues?, p2: String?, p3: Array<out String>?): Int {
+    override fun insert(uri: Uri?, values: ContentValues?): Uri {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun delete(p0: Uri?, p1: String?, p2: Array<out String>?): Int {
+    override fun update(uri: Uri?, values: ContentValues?, selection: String?, selectionArgs: Array<out String>?): Int {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getType(p0: Uri?): String {
+    override fun getType(uri: Uri?): String {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }
