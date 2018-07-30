@@ -14,6 +14,7 @@ import br.grupointegrado.tads.clima.util.JsonUtils
 import kotlinx.android.synthetic.main.activity_main.*
 import android.content.Intent
 import android.content.SharedPreferences
+import android.database.sqlite.SQLiteOpenHelper
 import android.net.Uri
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.AsyncTaskLoader
@@ -32,6 +33,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     var previsaoAdapter: PrevisaoAdapter? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
